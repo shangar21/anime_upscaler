@@ -1,0 +1,7 @@
+torchvision==0.8.2+cpu
+basicsr==1.3.4.9
+opencv_python==4.5.5.62
+torch==1.7.1+cpu
+realesrgan==0.2.3.0
+tqdm==4.62.3
+moviepy==1.0.3

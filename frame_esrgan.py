@@ -7,7 +7,7 @@ import cv2
 # These names are kinda random, because in python you can't have a variable name start with a number
 # CINEMA is basically 4K
 # DESKTOP is 1440p
-# TV is 1080p 
+# TV is 1080p
 CINEMA = (3840, 2160)
 DESKTOP = (2560, 1440)
 TV = (1920, 1080)
@@ -19,7 +19,7 @@ def upscale(model_path, im_path):
 	output, _ = upsampler.enhance(img, outscale=4)
 	return output
 
-# model_path = '/home/ssm/Documents/Real-ESRGAN/experiments/pretrained_models/RealESRGAN_x4plus_anime_6B.pth'
-# print('upscaling...')
-# output = upscale(model_path,'test_img/random_test_frame.jpg')
-# cv2.imwrite('test_img/upscaled_frame.jpg', output)
+model_path = '/home/ssm/Documents/Real-ESRGAN/experiments/pretrained_models/RealESRGAN_x4plus_anime_6B.pth'
+print('upscaling...')
+output = upscale(model_path,'/home/ssm/Downloads/wp2172808-great-teacher-onizuka-wallpapers.jpg')
+cv2.imwrite('test_img/upscaled_wp.jpg', output)
