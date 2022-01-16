@@ -27,8 +27,8 @@ def upscale_slice(model_path, image, slice):
 	for tile in tiles:
 		output, _ = upsampler.enhance(np.array(tile.image), outscale=4)
 		tile.image = Image.fromarray(output)
-		tile.coords = (tile.coords[0]*4, tile.coords[1]*4)
-	return join(tiles, width=width*4, height=height*4)
+		tile.coords = (tile.coords[0]*slice, tile.coords[1]*slice)
+	return join(tiles, width=width*slice, height=height*slice)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()

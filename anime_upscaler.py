@@ -23,14 +23,25 @@ parser.add_argument('-c', '--clear_temp', action='store_true', help='OPTIONAL: s
 parser.add_argument('-e', '--extract_audio', type=str, help='OPTIONAL: specify weather you want to seperately save the audio file from video (used if you want to use the audio with a seperate program like ffmpeg)')
 args = parser.parse_args()
 
-def extract_frames(vid_path):
+def extract_frames(vid_path, save=''):
 	vid = cv2.VideoCapture(vid_path)
 	images = []
+	count = 0
 	success, image = vid.read()
 	while success:
-		images.append(image)
+		if not save:
+			images.append(image)
+		else:
+			print('saving frame {}...'.format(count))
+			cv2.imwrite(save.format(count), image)
+			print('done saving frame {}...'.format(count))
 		success, image = vid.read()
+		count += 1
 	return images
+
+def get_fps(vid_path):
+	vid = cv2.VideoCapture(vid_path)
+	return vid.get(cv2.CAP_PROP_FPS)
 
 def create_temp_folder(vid_path):
 	if os.path.exists('tmp'):
@@ -73,7 +84,8 @@ def combine_frames(video_path, new_video_path):
 	images = [img for img in os.listdir('tmp/{}/upscaled'.format(folder_name))]
 	height, width, layers = cv2.imread('tmp/{}/upscaled/frame_0.png'.format(folder_name)).shape
 	fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-	video = cv2.VideoWriter(new_video_path, fourcc, 30, (width, height))
+	fps = get_fps(video_path)
+	video = cv2.VideoWriter(new_video_path, fourcc, fps, (width, height))
 	for i in tqdm(range(len(images))):
 		video.write(cv2.imread('tmp/{}/upscaled/frame_{}.png'.format(folder_name, i)))
 	cv2.destroyAllWindows()
@@ -83,7 +95,7 @@ def extract_audio(video_path, audio_path):
 	clip = mpe.VideoFileClip(video_path)
 	clip.audio.write_audiofile(audio_path)
 
-def copy_audio(original_video_path, new_video_path):
+def copy_audio(original_video_path, new_video_path, new_name=''):
 	folder_name = original_video_path.split('/')[-1].split('.')[0]
 	clip = mpe.VideoFileClip(original_video_path)
 	new_clip = mpe.VideoFileClip(new_video_path)
