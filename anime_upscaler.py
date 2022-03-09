@@ -177,5 +177,5 @@ if __name__ == '__main__':
 			if args.extract_audio:
 				extract_audio(args.input, args.extract_audio)
 		except Exception as e:
-			print(e)
-			shutil.rmtree('tmp')
+			print('Remove tmp if you want to start from scratch')
+			raise
