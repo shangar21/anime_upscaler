@@ -121,12 +121,14 @@ def upscale(vid_path, slice=None, save_prefix=''):
 		original_f = os.path.join(original, i)
 		upscaled_f = os.path.join(upscaled, i)
 
-		if slice:
-			out = frame_esrgan.upscale_slice(args.model_path, original_f, slice)
-			out.save(upscaled_f)
-		else:
-			out = frame_esrgan.upscale(args.model_path, original_f)
-			cv2.imwrite(upscaled_f, out)
+		# Reuse what we have if possible
+		if not os.path.exists(upscaled_f):
+			if slice:
+				out = frame_esrgan.upscale_slice(args.model_path, original_f, slice)
+				out.save(upscaled_f)
+			else:
+				out = frame_esrgan.upscale(args.model_path, original_f)
+				cv2.imwrite(upscaled_f, out)
 
 def combine_frames(video_path, new_video_path, save_prefix=''):
 	folder_name = video_path.split('/')[-1].split('.')[0]
@@ -146,6 +148,7 @@ def combine_frames(video_path, new_video_path, save_prefix=''):
 	fps = get_fps(video_path)
 	video = cv2.VideoWriter(new_video_path, fourcc, fps, (width, height))
 
+	print(f'combining {len(images)} frames into "{new_video_path}" ...')
 	for i in tqdm(range(len(images))):
 		fname = '{}_{}.png'.format(save_prefix, i)
 		fpath = os.path.join(upscaled, fname)
@@ -159,6 +162,7 @@ def extract_audio(video_path, audio_path):
 	clip.audio.write_audiofile(audio_path)
 
 def copy_audio(original_video_path, new_video_path, new_name=''):
+	print(f'copying audio...')
 	folder_name = original_video_path.split('/')[-1].split('.')[0]
 	clip = mpe.VideoFileClip(original_video_path)
 	new_clip = mpe.VideoFileClip(new_video_path)
