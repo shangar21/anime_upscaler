@@ -10,6 +10,8 @@ import image_slicer
 from image_slicer import join
 from PIL import Image
 import numpy as np
+from tqdm import tqdm
+
 
 def upscale(model_path, im_path):
 	model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
@@ -17,7 +19,6 @@ def upscale(model_path, im_path):
 	img = cv2.imread(im_path, cv2.IMREAD_UNCHANGED)
 	output, _ = upsampler.enhance(img, outscale=4)
 	return output
-
 
 def upscale_slice(model_path, image, slice):
 	width, height = Image.open(image).size
@@ -27,8 +28,8 @@ def upscale_slice(model_path, image, slice):
 	for tile in tiles:
 		output, _ = upsampler.enhance(np.array(tile.image), outscale=4)
 		tile.image = Image.fromarray(output)
-		tile.coords = (tile.coords[0]*slice, tile.coords[1]*slice)
-	return join(tiles, width=width*slice, height=height*slice)
+		tile.coords = (tile.coords[0]*4, tile.coords[1]*4)
+	return join(tiles, width=width*4, height=height*4)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
@@ -42,6 +43,7 @@ if __name__ == '__main__':
 	if args.model_path and args.input and args.output:
 		if args.slice:
 			output = upscale_slice(args.model_path, args.input, args.slice)
+			print(output.size)
 			output.save(args.output)
 		else:
 			output = upscale(args.model_path, args.input)
