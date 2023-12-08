@@ -32,6 +32,8 @@ For a single image:
 
 If memory usage is too high and you need to split frames and stitch back together use the `-s, --split` argument. Default number of splits is 4, but you can make as many as you want.
 
+If you want to change the final size, one can now add the `-r` or the `--resize` argument, followed by a string indicating the desired resolution, for example we would add `-r 1920x1080` to resize the output to that size.
+
 Please note that the output of a single image must be a PNG due to alpha channel. Will be fixed in the future hopefully
 
 For a video:
