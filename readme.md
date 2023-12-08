@@ -1,6 +1,6 @@
 # anime upscaler
 
-My usage of [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) to upscale anime, I hope to use this on a proper GPU cuz doing this on CPU is completely shit 😂, I even tried on my 750Ti on my server, but the 2GB of vram was not enough 😭. 
+My usage of [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) to upscale anime.
 
 # Some results:
 
@@ -21,6 +21,10 @@ https://user-images.githubusercontent.com/56494763/148880280-fb6488c1-e87c-47e4-
 https://user-images.githubusercontent.com/56494763/148880247-a99d3bd5-eb7e-4371-8de2-68d55cab801e.mp4
 
 # How To Use
+
+Download anime model:
+
+https://github.com/xinntao/Real-ESRGAN/blob/master/docs/anime_model.md
 
 For a single image:
 
