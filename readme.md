@@ -22,11 +22,11 @@ https://user-images.githubusercontent.com/56494763/148880247-a99d3bd5-eb7e-4371-
 
 # How To Use
 
-Download anime model:
+## Download anime model:
 
 https://github.com/xinntao/Real-ESRGAN/blob/master/docs/anime_model.md
 
-For a single image:
+## For a single image:
 
 `python3 frame_esrgan.py -m /path/to/RealESRGAN_x4plus_anime_6B.pth -i path/to/img -o path/to/img.png`
 
@@ -36,7 +36,7 @@ If you want to change the final size, one can now add the `-r` or the `--resize`
 
 Please note that the output of a single image must be a PNG due to alpha channel. Will be fixed in the future hopefully
 
-For a video:
+## For a video:
 
 `python3 anime_upscaler.py -m /path/to/RealESRGAN_x4plus_anime_6B.pth -i path/to/video -o path/to/desired/output -s -a`
 
