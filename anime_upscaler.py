@@ -114,7 +114,7 @@ def copy_audio(original_video_path, new_video_path, new_name=''):
 if __name__ == '__main__':
     if args.model_path and args.input and args.output:
         try:
-    #       upscale(args.input, slice=args.slice)
+            upscale(args.input, slice=args.slice)
             combine_frames(args.input, args.output)
             if args.audio:
                 copy_audio(args.input, args.output)
@@ -122,4 +122,4 @@ if __name__ == '__main__':
                 shutil.rmtree('tmp')
         except Exception as e:
             print(e)
-    #       shutil.rmtree('tmp')
+            shutil.rmtree('tmp')
