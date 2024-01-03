@@ -12,13 +12,15 @@ from PIL import Image
 import numpy as np
 from tqdm import tqdm
 
+device = None if not torch.backends.mps.is_available() else torch.device('mps') # RealESRGANer will auto check for cuda if device is None
+
 def convert_from_image_to_cv2(img: Image) -> np.ndarray:
 	# return np.asarray(img)
 	return cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
 
 def upscale(model_path, im_path):
 	model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
-	upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0, tile_pad=10, pre_pad=0, half=False)
+	upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0, tile_pad=10, pre_pad=0, half=False, device=device)
 	img = cv2.imread(im_path, cv2.IMREAD_UNCHANGED)
 	output, _ = upsampler.enhance(img, outscale=4)
 	return output
@@ -27,7 +29,7 @@ def upscale_slice(model_path, image, slice):
 	width, height = Image.open(image).size
 	tiles = image_slicer.slice(image, slice, save=False)
 	model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
-	upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0, tile_pad=10, pre_pad=0, half=False)
+	upsampler = RealESRGANer(scale=4, model_path=model_path, model=model, tile=0, tile_pad=10, pre_pad=0, half=False, device=device)
 	for tile in tiles:
 		output, _ = upsampler.enhance(np.array(tile.image), outscale=4)
 		tile.image = Image.fromarray(output)
