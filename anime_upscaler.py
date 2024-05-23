@@ -124,10 +124,9 @@ def upscale(vid_path, slice=None, save_prefix=''):
         if not os.path.exists(upscaled_f):
             if slice:
                 out = frame_esrgan.upscale_slice(args.model_path, original_f, slice)
-                out.save(upscaled_f)
             else:
                 out = frame_esrgan.upscale(args.model_path, original_f)
-                cv2.imwrite(upscaled_f, out)
+            cv2.imwrite(upscaled_f, out)
 
 def combine_frames(video_path, new_video_path, save_prefix=''):
     folder_name = video_path.split('/')[-1].split('.')[0]
