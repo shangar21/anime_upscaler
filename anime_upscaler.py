@@ -56,12 +56,12 @@ def extract_frames(vid_path, save_prefix=''):
         if not save:
             images.append(image)
         else:
-            print('saving frame {}...'.format(count))
+            if count % 1000 == 0:
+                print('saving frame {}...'.format(count))
             fname = save.format(count)
             fpath = os.path.join(original, fname)
             cv2.imwrite(fpath, image)
             images.append(fname)
-            print('done saving frame {}...'.format(count))
         success, image = vid.read()
         count += 1
     return images
