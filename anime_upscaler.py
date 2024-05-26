@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import subprocess
 import ffmpegcv
+from concurrent.futures import ThreadPoolExecutor
 
 
 parser = argparse.ArgumentParser()
@@ -52,14 +53,14 @@ def extract_frames(vid_path, save_prefix='', cuda_decode=False):
 
     images = []
     video_capture = ffmpegcv.VideoCaptureNV if cuda_decode else ffmpegcv.VideoCapture
-    with video_capture(vid_path) as cap:
+    with video_capture(vid_path) as cap, ThreadPoolExecutor() as executor:
         for iframe, frame in tqdm(enumerate(cap), desc="Extracting frames", unit=" frame"):
             if not save:
                 images.append(frame)
             else:
                 fname = save.format(iframe)
                 fpath = os.path.join(original, fname)
-                cv2.imwrite(fpath, frame)
+                executor.submit(cv2.imwrite, fpath, frame)
                 images.append(fname)
 
     return images
