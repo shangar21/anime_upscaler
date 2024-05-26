@@ -4,12 +4,6 @@ from tqdm import tqdm
 import os
 import argparse
 import shutil
-import image_slicer
-from image_slicer import join
-import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import subprocess
 import ffmpegcv
 from concurrent.futures import ThreadPoolExecutor
@@ -26,12 +20,6 @@ parser.add_argument('-c', '--clear_temp', action='store_true', help='OPTIONAL: s
 parser.add_argument('--cuda-decode', action='store_true', help='OPTIONAL: use CUDA to extract frames. For non-complex encodings (up to h264) it may slow extraction down and better leave it off')
 parser.add_argument('--cuda-encode', action='store_true', help='OPTIONAL: use CUDA to extract frames')
 args = parser.parse_args()
-
-def extract_frameno(fname):
-    no_ext = fname.rsplit('.', 1)[0]
-    only_num = no_ext.rsplit('_', 1)[1]
-
-    return int(only_num)
 
 def extract_frames(vid_path, save_prefix='frame', cuda_decode=False):
     save = f'{save_prefix}_{{}}.png'
