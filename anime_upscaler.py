@@ -11,6 +11,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import subprocess
+import ffmpegcv
 
 
 parser = argparse.ArgumentParser()
@@ -128,32 +129,24 @@ def upscale(vid_path, slice=None, save_prefix=''):
                 out = frame_esrgan.upscale(args.model_path, original_f)
             cv2.imwrite(upscaled_f, out)
 
-def combine_frames(video_path, new_video_path, save_prefix=''):
+def combine_frames(video_path, new_video_path, save_prefix='', cuda=False):
     folder_name = video_path.split('/')[-1].split('.')[0]
-
-    original = os.path.join('tmp', folder_name, 'original')
     upscaled = os.path.join('tmp', folder_name, 'upscaled')
 
     if not save_prefix:
         save_prefix = 'frame'
 
     images = [img for img in os.listdir(upscaled)]
-    file0 = os.path.join(upscaled, '{}_0.png'.format(save_prefix))
-    height, width, layers = cv2.imread(file0).shape
-
-    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-
     fps = get_fps(video_path)
-    video = cv2.VideoWriter(new_video_path, fourcc, fps, (width, height))
 
     print(f'combining {len(images)} frames into "{new_video_path}" ...')
-    for i in tqdm(range(len(images))):
-        fname = '{}_{}.png'.format(save_prefix, i)
-        fpath = os.path.join(upscaled, fname)
-        video.write(cv2.imread(fpath))
+    with ffmpegcv.VideoWriter(new_video_path, codec='hevc', fps=fps) as video:
+        for i in tqdm(range(len(images))):
+            fname = f'{save_prefix}_{i}.png'
+            fpath = os.path.join(upscaled, fname)
+            video.write(cv2.imread(fpath))
 
     cv2.destroyAllWindows()
-    video.release()
 
 def copy_audio(original_video_path, new_video_path, new_name=''):
     #ffmpeg -i input_0.mp4 -i input_1.mp4 -c copy -map 0:v:0 -map 1:a:0 -shortest out.mp4
