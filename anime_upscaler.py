@@ -49,28 +49,23 @@ def extract_frames(vid_path, save_prefix=''):
             print(f'Found {len(files)} frames extracted')
             return files
 
-    vid = cv2.VideoCapture(vid_path)
     images = []
-    count = 0
+    with ffmpegcv.VideoCapture(vid_path) as cap:
+        for iframe, frame in tqdm(enumerate(cap), desc="Extracting frames", unit=" frame"):
+            if not save:
+                images.append(frame)
+            else:
+                fname = save.format(iframe)
+                fpath = os.path.join(original, fname)
+                cv2.imwrite(fpath, frame)
+                images.append(fname)
 
-    success, image = vid.read()
-    while success:
-        if not save:
-            images.append(image)
-        else:
-            if count % 1000 == 0:
-                print('saving frame {}...'.format(count))
-            fname = save.format(count)
-            fpath = os.path.join(original, fname)
-            cv2.imwrite(fpath, image)
-            images.append(fname)
-        success, image = vid.read()
-        count += 1
     return images
 
+
 def get_fps(vid_path):
-    vid = cv2.VideoCapture(vid_path)
-    return vid.get(cv2.CAP_PROP_FPS)
+    vid = ffmpegcv.VideoCapture(vid_path)
+    return vid.fps
 
 def create_temp_folder(vid_path):
     if os.path.exists('tmp'):
