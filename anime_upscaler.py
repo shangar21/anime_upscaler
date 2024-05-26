@@ -168,6 +168,5 @@ if __name__ == '__main__':
                 shutil.rmtree('tmp')
         except Exception as e:
             print(e)
-            shutil.rmtree('tmp')
             print('Remove tmp if you want to start from scratch')
             raise
