@@ -101,17 +101,19 @@ def upscale(vid_path, slice=None, save_prefix='frame', cuda_decode=False):
     setup_frames(vid_path, save_prefix, cuda_decode)
 
     print('upscaling...')
-    for i in tqdm(os.listdir(original)):
-        original_f = os.path.join(original, i)
-        upscaled_f = os.path.join(upscaled, i)
+    with ThreadPoolExecutor() as executor:
+        for i in tqdm(os.listdir(original), desc="Upscaling frames", unit=" frame"):
+            original_f = os.path.join(original, i)
+            upscaled_f = os.path.join(upscaled, i)
 
-        # Reuse what we have if possible
-        if not os.path.exists(upscaled_f):
-            if slice:
-                out = frame_esrgan.upscale_slice(args.model_path, original_f, slice)
-            else:
-                out = frame_esrgan.upscale(args.model_path, original_f)
-            cv2.imwrite(upscaled_f, out)
+            # Reuse what we have if possible
+            if not os.path.exists(upscaled_f):
+                if slice:
+                    out = frame_esrgan.upscale_slice(args.model_path, original_f, slice)
+                else:
+                    out = frame_esrgan.upscale(args.model_path, original_f)
+
+                executor.submit(cv2.imwrite, upscaled_f, out)
 
 def combine_frames(video_path, new_video_path, save_prefix='frame', cuda_encode=False):
     folder_name = video_path.split('/')[-1].split('.')[0]
@@ -126,7 +128,7 @@ def combine_frames(video_path, new_video_path, save_prefix='frame', cuda_encode=
     print(f'combining {len(images)} frames into "{new_video_path}" ...')
     video_writer = ffmpegcv.VideoWriterNV if cuda_encode else ffmpegcv.VideoWriter
     with video_writer(new_video_path, codec='hevc', fps=fps) as video:
-        for i in tqdm(range(len(images))):
+        for i in tqdm(range(len(images)), desc="Combining frames", unit=" frame"):
             fname = f'{save_prefix}_{i}.png'
             fpath = os.path.join(upscaled, fname)
             video.write(cv2.imread(fpath))
