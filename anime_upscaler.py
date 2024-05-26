@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_path', type=str, help='REQUIRED: specify path of the model being used')
 parser.add_argument('-i', '--input', type=str, help='REQUIRED: specify path of the image you want to upscale')
 parser.add_argument('-o', '--output', type=str, help='REQUIRED: specify path where you want to save image')
-parser.add_argument('-S', '--save-prefix', type=str, help='OPTIONAL: Save frames with prefix to save memory')
+parser.add_argument('-S', '--save-prefix', default="frame", type=str, help='OPTIONAL: Save frames with this prefix')
 parser.add_argument('-s', '--slice', nargs='?', type=int, const=4, help='OPTIONAL: specify weather to split frames, recommended to use to help with VRAM unless you got a fucken quadro or something' )
 parser.add_argument('-a', '--audio', action='store_true', help='OPTIONAL: specify weather you want to copy audio from source as well')
 parser.add_argument('-c', '--clear_temp', action='store_true', help='OPTIONAL: specify weather you want to clear temporary folder with upscaled frames after you are finished with final video')
@@ -33,8 +33,8 @@ def extract_frameno(fname):
 
     return int(only_num)
 
-def extract_frames(vid_path, save_prefix='', cuda_decode=False):
-    save = '{}_{{}}.png'.format(save_prefix) if save_prefix else False
+def extract_frames(vid_path, save_prefix='frame', cuda_decode=False):
+    save = f'{save_prefix}_{{}}.png'
 
     if not os.path.exists(vid_path):
         raise RuntimeError(f'path missing {vid_path}')
@@ -43,27 +43,18 @@ def extract_frames(vid_path, save_prefix='', cuda_decode=False):
     original = os.path.join('tmp', folder_name, 'original')
 
     # Reuse frames if we have them
-    if save_prefix:
-        files = os.listdir(original)
-        files = (f for f in files if f.startswith(save_prefix) and '_' in f and f.endswith('.png'))
-        files = sorted(files, key=extract_frameno)
-        if files:
-            print(f'Found {len(files)} frames extracted')
-            return files
+    files = os.listdir(original)
+    files = [f for f in files if f.startswith(save_prefix) and '_' in f and f.endswith('.png')]
+    if files:
+        print(f'Found {len(files)} frames extracted')
+        return
 
-    images = []
     video_capture = ffmpegcv.VideoCaptureNV if cuda_decode else ffmpegcv.VideoCapture
     with video_capture(vid_path) as cap, ThreadPoolExecutor() as executor:
         for iframe, frame in tqdm(enumerate(cap), desc="Extracting frames", unit=" frame"):
-            if not save:
-                images.append(frame)
-            else:
-                fname = save.format(iframe)
-                fpath = os.path.join(original, fname)
-                executor.submit(cv2.imwrite, fpath, frame)
-                images.append(fname)
-
-    return images
+            fname = save.format(iframe)
+            fpath = os.path.join(original, fname)
+            executor.submit(cv2.imwrite, fpath, frame)
 
 
 def get_fps(vid_path):
@@ -85,7 +76,7 @@ def get_dir(path):
         os.mkdir(path)
     return path
 
-def setup_frames(vid_path, save_prefix='', cuda_decode=False):
+def setup_frames(vid_path, save_prefix='frame', cuda_decode=False):
     create_temp_folder(vid_path)
 
     folder_name = vid_path.split('/')[-1].split('.')[0]
@@ -98,21 +89,16 @@ def setup_frames(vid_path, save_prefix='', cuda_decode=False):
     if not os.path.exists(upscaled):
         os.mkdir(upscaled)
 
-    images = extract_frames(vid_path, save_prefix=save_prefix, cuda_decode=cuda_decode)
-    if not save_prefix:
-        for i in tqdm(range(len(images))):
-            fname = 'frame_{}.png'.format(i)
-            ipath = os.path.join(original, fname)
-            cv2.imwrite(ipath, images[i])
+    extract_frames(vid_path, save_prefix, cuda_decode)
 
-def upscale(vid_path, slice=None, save_prefix='', cuda_decode=False):
+def upscale(vid_path, slice=None, save_prefix='frame', cuda_decode=False):
     folder_name = vid_path.split('/')[-1].split('.')[0]
 
     original = os.path.join('tmp', folder_name, 'original')
     upscaled = os.path.join('tmp', folder_name, 'upscaled')
 
     print('extracting frames...')
-    setup_frames(vid_path, save_prefix=save_prefix, cuda_decode=cuda_decode)
+    setup_frames(vid_path, save_prefix, cuda_decode)
 
     print('upscaling...')
     for i in tqdm(os.listdir(original)):
@@ -127,7 +113,7 @@ def upscale(vid_path, slice=None, save_prefix='', cuda_decode=False):
                 out = frame_esrgan.upscale(args.model_path, original_f)
             cv2.imwrite(upscaled_f, out)
 
-def combine_frames(video_path, new_video_path, save_prefix='', cuda_encode=False):
+def combine_frames(video_path, new_video_path, save_prefix='frame', cuda_encode=False):
     folder_name = video_path.split('/')[-1].split('.')[0]
     upscaled = os.path.join('tmp', folder_name, 'upscaled')
 
@@ -172,7 +158,7 @@ def copy_audio(original_video_path, new_video_path, new_name=''):
 if __name__ == '__main__':
     if args.model_path and args.input and args.output:
         try:
-            upscale(args.input, slice=args.slice, save_prefix=args.save_prefix, cuda_decode=args.cuda_decode)
+            upscale(args.input, args.slice, args.save_prefix, args.cuda_decode)
             combine_frames(args.input, args.output, args.save_prefix, args.cuda_encode)
             if args.audio:
                 copy_audio(args.input, args.output)
