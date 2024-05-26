@@ -87,7 +87,7 @@ def get_dir(path):
         os.mkdir(path)
     return path
 
-def setup_frames(vid_path, slice=None, save_prefix=''):
+def setup_frames(vid_path, save_prefix=''):
     create_temp_folder(vid_path)
 
     folder_name = vid_path.split('/')[-1].split('.')[0]
@@ -101,7 +101,6 @@ def setup_frames(vid_path, slice=None, save_prefix=''):
         os.mkdir(upscaled)
 
     images = extract_frames(vid_path, save_prefix=save_prefix)
-    slices = []
     if not save_prefix:
         for i in tqdm(range(len(images))):
             fname = 'frame_{}.png'.format(i)
