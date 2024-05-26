@@ -22,6 +22,7 @@ parser.add_argument('-S', '--save-prefix', type=str, help='OPTIONAL: Save frames
 parser.add_argument('-s', '--slice', nargs='?', type=int, const=4, help='OPTIONAL: specify weather to split frames, recommended to use to help with VRAM unless you got a fucken quadro or something' )
 parser.add_argument('-a', '--audio', action='store_true', help='OPTIONAL: specify weather you want to copy audio from source as well')
 parser.add_argument('-c', '--clear_temp', action='store_true', help='OPTIONAL: specify weather you want to clear temporary folder with upscaled frames after you are finished with final video')
+parser.add_argument('--cuda-encode', action='store_true', help='OPTIONAL: use CUDA to combine frames')
 args = parser.parse_args()
 
 def extract_frameno(fname):
@@ -129,7 +130,7 @@ def upscale(vid_path, slice=None, save_prefix=''):
                 out = frame_esrgan.upscale(args.model_path, original_f)
             cv2.imwrite(upscaled_f, out)
 
-def combine_frames(video_path, new_video_path, save_prefix='', cuda=False):
+def combine_frames(video_path, new_video_path, save_prefix='', cuda_encode=False):
     folder_name = video_path.split('/')[-1].split('.')[0]
     upscaled = os.path.join('tmp', folder_name, 'upscaled')
 
@@ -140,7 +141,8 @@ def combine_frames(video_path, new_video_path, save_prefix='', cuda=False):
     fps = get_fps(video_path)
 
     print(f'combining {len(images)} frames into "{new_video_path}" ...')
-    with ffmpegcv.VideoWriter(new_video_path, codec='hevc', fps=fps) as video:
+    video_writer = ffmpegcv.VideoWriterNV if cuda_encode else ffmpegcv.VideoWriter
+    with video_writer(new_video_path, codec='hevc', fps=fps) as video:
         for i in tqdm(range(len(images))):
             fname = f'{save_prefix}_{i}.png'
             fpath = os.path.join(upscaled, fname)
@@ -174,7 +176,7 @@ if __name__ == '__main__':
     if args.model_path and args.input and args.output:
         try:
             upscale(args.input, slice=args.slice, save_prefix=args.save_prefix)
-            combine_frames(args.input, args.output)
+            combine_frames(args.input, args.output, args.save_prefix, args.cuda_encode)
             if args.audio:
                 copy_audio(args.input, args.output)
             if args.clear_temp:
