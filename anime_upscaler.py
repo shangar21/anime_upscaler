@@ -1,13 +1,14 @@
-import frame_esrgan
-import cv2
-from tqdm import tqdm
-import os
 import argparse
+import os
 import shutil
 import subprocess
-import ffmpegcv
 from concurrent.futures import ThreadPoolExecutor
 
+import cv2
+import ffmpegcv
+from tqdm import tqdm
+
+import frame_esrgan
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model_path', type=str, help='REQUIRED: specify path of the model being used')
