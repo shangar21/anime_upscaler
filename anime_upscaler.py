@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 
 import cv2
@@ -120,7 +121,10 @@ def combine_frames(video_path, new_video_path, save_prefix='frame', cuda_encode=
         for i in tqdm(range(len(images)), desc="Combining frames", unit=" frame"):
             fname = f'{save_prefix}_{i}.png'
             fpath = os.path.join(upscaled, fname)
-            video.write(cv2.imread(fpath))
+            if os.path.exists(fpath):
+                video.write(cv2.imread(fpath))
+            else:
+                print(f"Upscaled frame '{fpath}' is missing. It was omitted from the output", file=sys.stderr)
 
     cv2.destroyAllWindows()
 
