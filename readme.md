@@ -22,6 +22,20 @@ https://user-images.githubusercontent.com/56494763/148880247-a99d3bd5-eb7e-4371-
 
 # How To Use
 
+## Install libraries
+
+A record is kept in requirements.txt, and can be installed with:
+
+`pip install -r requirements.txt`
+
+However, after doing this, you must also install image slicer with:
+
+`pip install -e submodules/image_slicer` 
+
+And also install BasicSR with:
+
+`pip install -e submodules/BasicSR`
+
 ## Download anime model:
 
 https://github.com/xinntao/Real-ESRGAN/blob/master/docs/anime_model.md
