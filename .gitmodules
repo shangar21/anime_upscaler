@@ -1,0 +1,9 @@
+[submodule "image_slicer"]
+	path = image_slicer
+	url = git@github.com:shangar21/image_slicer.git
+[submodule "submodules/image_slicer"]
+	path = submodules/image_slicer
+	url = git@github.com:shangar21/image_slicer.git
+[submodule "submodules/BasicSR"]
+	path = submodules/BasicSR
+	url = git@github.com:shangar21/BasicSR.git
