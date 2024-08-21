@@ -3,5 +3,5 @@ moviepy==1.0.3
 opencv_python==4.8.1.78
 Pillow==10.1.0
 realesrgan==0.3.0
-torchvision==0.15.2
+torchvision
 tqdm==4.66.1
